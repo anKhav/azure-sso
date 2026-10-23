@@ -1,0 +1,20 @@
+{
+  "name": "azure-saml-sso-test",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "dev:backend": "npm run start:dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "format": "npm run format --workspace backend && npm run format --workspace frontend",
+    "test": "npm run test --workspace backend",
+    "typecheck": "npm run typecheck --workspace backend && npm run typecheck --workspace frontend"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

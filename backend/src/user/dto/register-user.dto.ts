@@ -8,7 +8,10 @@ import {
 import { ApiProperty } from "@nestjs/swagger";
 
 export class RegisterUserDto {
-  @ApiProperty({ example: "user@example.com" })
+  @ApiProperty({
+    example: "user@example.com",
+    description: "Unique email address for the new local user.",
+  })
   @IsEmail()
   @MaxLength(254)
   email!: string;
@@ -17,6 +20,8 @@ export class RegisterUserDto {
     minLength: 12,
     maxLength: 128,
     format: "password",
+    description:
+      "Password containing uppercase, lowercase, numeric, and special characters.",
   })
   @IsString()
   @MinLength(12)

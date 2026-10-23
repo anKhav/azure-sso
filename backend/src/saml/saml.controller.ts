@@ -17,7 +17,13 @@ import { SsoAppService } from "../sso/sso-app.service";
 import { UserSsoLinkService } from "../sso/user-sso-link.service";
 import { SamlFlowService } from "./saml-flow.service";
 import { SamlService } from "./saml.service";
-import { ApiExcludeEndpoint, ApiTags } from "@nestjs/swagger";
+import {
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiParam,
+  ApiProduces,
+  ApiTags,
+} from "@nestjs/swagger";
 
 @Controller("saml")
 @ApiTags("SAML protocol")
@@ -32,6 +38,17 @@ export class SamlController {
   ) {}
 
   @Get("metadata/:appId")
+  @ApiOperation({
+    summary: "Get SAML service-provider metadata",
+    description:
+      "Returns XML metadata containing the application's Entity ID and Assertion Consumer Service URL.",
+  })
+  @ApiParam({
+    name: "appId",
+    format: "uuid",
+    description: "SSO application ID.",
+  })
+  @ApiProduces("application/samlmetadata+xml")
   @Header("Content-Type", "application/samlmetadata+xml; charset=utf-8")
   async metadata(@Param("appId") appId: string): Promise<string> {
     return this.saml.metadata(await this.apps.findRecordById(appId));

@@ -25,7 +25,7 @@ import { RedirectUrlService } from "./redirect-url.service";
 import { SsoAppService } from "./sso-app.service";
 import { PublicUserSsoLink } from "./user-sso-link.model";
 import { UserSsoLinkService } from "./user-sso-link.service";
-import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 @Controller("user/sso")
 @ApiTags("SSO authentication")
@@ -40,6 +40,11 @@ export class SsoAuthController {
   ) {}
 
   @Get("links")
+  @ApiOperation({
+    summary: "List current user SSO links",
+    description:
+      "Returns SSO applications linked to the current user without exposing the Azure NameID.",
+  })
   @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard)
   listLinks(
@@ -49,6 +54,11 @@ export class SsoAuthController {
   }
 
   @Delete("register")
+  @ApiOperation({
+    summary: "Unregister a user from SSO",
+    description:
+      "Removes the selected user's identity link for one SSO application. Admin only.",
+  })
   @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard, AdminGuard, TrustedOriginGuard)
   async unregister(@Body() body: UnregisterSsoDto): Promise<{ success: true }> {
@@ -59,6 +69,11 @@ export class SsoAuthController {
   }
 
   @Post("register")
+  @ApiOperation({
+    summary: "Start SSO user registration",
+    description:
+      "Creates a short-lived SAML linking flow and responds with 303 See Other to Microsoft Entra. Admin only.",
+  })
   @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard, AdminGuard, TrustedOriginGuard)
   async register(
@@ -82,6 +97,11 @@ export class SsoAuthController {
   }
 
   @Get("login")
+  @ApiOperation({
+    summary: "Start SSO login",
+    description:
+      "Creates a short-lived SAML login flow and responds with 302 Found to Microsoft Entra. No existing session is required.",
+  })
   async login(
     @Query() query: StartSsoLoginDto,
     @Res() response: Response,

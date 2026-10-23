@@ -1,10 +1,17 @@
 import { IsString, IsUUID, IsUrl, MaxLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 export class StartSsoRegisterDto {
-  @ApiProperty({ format: "uuid", description: "Local user to link." })
+  @ApiProperty({
+    format: "uuid",
+    description:
+      "ID of the local user that will receive the verified Azure identity link.",
+  })
   @IsUUID()
   userId!: string;
-  @ApiProperty({ format: "uuid", description: "Configured SSO application." })
+  @ApiProperty({
+    format: "uuid",
+    description: "ID of the configured SSO application used for registration.",
+  })
   @IsUUID()
   appId!: string;
   @ApiProperty({

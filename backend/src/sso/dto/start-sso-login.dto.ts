@@ -1,7 +1,10 @@
 import { IsNotEmpty, IsString, IsUrl, MaxLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 export class StartSsoLoginDto {
-  @ApiProperty({ example: "Test App" })
+  @ApiProperty({
+    example: "Test App",
+    description: "Exact local name of the configured SSO application.",
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)

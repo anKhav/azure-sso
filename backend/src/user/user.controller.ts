@@ -19,7 +19,12 @@ import { ApiError } from "../common/api-error";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { PublicUser } from "./user.model";
 import { UserService } from "./user.service";
-import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
+import {
+  ApiCookieAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from "@nestjs/swagger";
 
 @Controller("user")
 @ApiTags("Users")
@@ -30,6 +35,11 @@ export class UserController {
   ) {}
 
   @Post("login")
+  @ApiOperation({
+    summary: "Log in with email and password",
+    description:
+      "Validates local credentials and sets the HTTP-only session cookie.",
+  })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginUserDto,
@@ -41,6 +51,10 @@ export class UserController {
   }
 
   @Get("me")
+  @ApiOperation({
+    summary: "Get the current user",
+    description: "Restores the user represented by the current session cookie.",
+  })
   @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard)
   async me(
@@ -50,6 +64,10 @@ export class UserController {
   }
 
   @Post("logout")
+  @ApiOperation({
+    summary: "Log out",
+    description: "Clears the current session cookie.",
+  })
   @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard, TrustedOriginGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -58,6 +76,16 @@ export class UserController {
   }
 
   @Get(":id")
+  @ApiOperation({
+    summary: "Get a user by ID",
+    description:
+      "Returns the requested user only when it is the current session user.",
+  })
+  @ApiParam({
+    name: "id",
+    format: "uuid",
+    description: "Local user ID. It must match the current session user.",
+  })
   @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard)
   async getById(

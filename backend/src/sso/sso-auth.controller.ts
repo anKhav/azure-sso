@@ -25,8 +25,10 @@ import { RedirectUrlService } from "./redirect-url.service";
 import { SsoAppService } from "./sso-app.service";
 import { PublicUserSsoLink } from "./user-sso-link.model";
 import { UserSsoLinkService } from "./user-sso-link.service";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller("user/sso")
+@ApiTags("SSO authentication")
 export class SsoAuthController {
   constructor(
     private readonly apps: SsoAppService,
@@ -38,6 +40,7 @@ export class SsoAuthController {
   ) {}
 
   @Get("links")
+  @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard)
   listLinks(
     @Req() request: AuthenticatedRequest,
@@ -46,10 +49,9 @@ export class SsoAuthController {
   }
 
   @Delete("register")
+  @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard, AdminGuard, TrustedOriginGuard)
-  async unregister(
-    @Body() body: UnregisterSsoDto,
-  ): Promise<{ success: true }> {
+  async unregister(@Body() body: UnregisterSsoDto): Promise<{ success: true }> {
     await this.apps.findRecordById(body.appId);
     await this.users.findPublicById(body.userId);
     await this.links.removeForUser(body.userId, body.appId);
@@ -57,6 +59,7 @@ export class SsoAuthController {
   }
 
   @Post("register")
+  @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard, AdminGuard, TrustedOriginGuard)
   async register(
     @Body() body: StartSsoRegisterDto,

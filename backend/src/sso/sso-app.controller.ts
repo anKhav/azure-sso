@@ -18,13 +18,39 @@ import { CreateSsoAppDto } from "./dto/create-sso-app.dto";
 import { PublicSsoApp } from "./sso-app.model";
 import { SsoAppService } from "./sso-app.service";
 import { UserSsoLinkService } from "./user-sso-link.service";
+import { ApiBody, ApiConsumes, ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller("sso/app")
 @UseGuards(SessionGuard, AdminGuard)
+@ApiTags("SSO applications")
+@ApiCookieAuth("azure_saml_session")
 export class SsoAppController {
-  constructor(private readonly apps: SsoAppService, private readonly links: UserSsoLinkService) {}
+  constructor(
+    private readonly apps: SsoAppService,
+    private readonly links: UserSsoLinkService,
+  ) {}
 
   @Post("create")
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      required: [
+        "name",
+        "loginUrl",
+        "applicationId",
+        "azureIssuer",
+        "certificate",
+      ],
+      properties: {
+        name: { type: "string", example: "Test App" },
+        loginUrl: { type: "string", format: "uri" },
+        applicationId: { type: "string" },
+        azureIssuer: { type: "string", format: "uri" },
+        certificate: { type: "string", format: "binary" },
+      },
+    },
+  })
   @UseGuards(TrustedOriginGuard)
   @UseInterceptors(
     FileInterceptor("certificate", {

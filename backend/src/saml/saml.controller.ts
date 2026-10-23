@@ -17,8 +17,10 @@ import { SsoAppService } from "../sso/sso-app.service";
 import { UserSsoLinkService } from "../sso/user-sso-link.service";
 import { SamlFlowService } from "./saml-flow.service";
 import { SamlService } from "./saml.service";
+import { ApiExcludeEndpoint, ApiTags } from "@nestjs/swagger";
 
 @Controller("saml")
+@ApiTags("SAML protocol")
 export class SamlController {
   constructor(
     private readonly apps: SsoAppService,
@@ -36,6 +38,7 @@ export class SamlController {
   }
 
   @Post("acs/:appId")
+  @ApiExcludeEndpoint()
   async acs(
     @Param("appId") appId: string,
     @Body() body: { SAMLResponse?: string; RelayState?: string },

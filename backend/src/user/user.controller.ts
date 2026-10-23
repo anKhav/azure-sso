@@ -19,8 +19,10 @@ import { ApiError } from "../common/api-error";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { PublicUser } from "./user.model";
 import { UserService } from "./user.service";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller("user")
+@ApiTags("Users")
 export class UserController {
   constructor(
     private readonly users: UserService,
@@ -39,6 +41,7 @@ export class UserController {
   }
 
   @Get("me")
+  @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard)
   async me(
     @Req() request: AuthenticatedRequest,
@@ -47,6 +50,7 @@ export class UserController {
   }
 
   @Post("logout")
+  @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard, TrustedOriginGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   logout(@Res({ passthrough: true }) response: Response): void {
@@ -54,6 +58,7 @@ export class UserController {
   }
 
   @Get(":id")
+  @ApiCookieAuth("azure_saml_session")
   @UseGuards(SessionGuard)
   async getById(
     @Param("id") id: string,

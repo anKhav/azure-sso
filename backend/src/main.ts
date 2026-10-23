@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
+  app.setGlobalPrefix("api");
   configureApp(app);
   const swaggerConfig = new DocumentBuilder()
     .setTitle("Azure SAML SSO API")
@@ -16,7 +17,9 @@ async function bootstrap(): Promise<void> {
     .addCookieAuth("azure_saml_session")
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup("api-docs", app, document);
+  SwaggerModule.setup("api/docs", app, document, {
+    jsonDocumentUrl: "/api/openapi.json",
+  });
   await app.listen(Number(process.env.PORT ?? 3001));
 }
 

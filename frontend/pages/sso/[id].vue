@@ -5,7 +5,7 @@ const route = useRoute();
 const api = useApi();
 const { data: app, error } = await useAsyncData(
   `sso-app-${route.params.id}`,
-  () => api<SsoApp>(`/sso/app/${route.params.id}`),
+  () => api<SsoApp>(`/api/sso/app/${route.params.id}`),
 );
 </script>
 <template>

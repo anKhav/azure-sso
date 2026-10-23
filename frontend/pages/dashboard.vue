@@ -5,7 +5,7 @@ const { user, logout } = useAuth();
 const api = useApi();
 const { data: links } = await useAsyncData(
   "my-sso-links",
-  () => api<SsoLink[]>("/user/sso/links"),
+  () => api<SsoLink[]>("/api/user/sso/links"),
   { default: () => [] },
 );
 </script>

@@ -5,14 +5,14 @@ export function useAuth() {
   const api = useApi();
   async function restore(): Promise<User | null> {
     try {
-      user.value = (await api<{ user: User }>("/user/me")).user;
+      user.value = (await api<{ user: User }>("/api/user/me")).user;
     } catch {
       user.value = null;
     }
     return user.value;
   }
   async function logout(): Promise<void> {
-    await api("/user/logout", { method: "POST" });
+    await api("/api/user/logout", { method: "POST" });
     user.value = null;
     await navigateTo("/login");
   }

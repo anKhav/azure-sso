@@ -9,12 +9,12 @@ const pending = ref(false);
 const error = ref("");
 const { data: users, refresh } = await useAsyncData(
   "admin-users",
-  () => api<AdminUser[]>("/admin/users"),
+  () => api<AdminUser[]>("/api/admin/users"),
   { default: () => [] },
 );
 const { data: apps } = await useAsyncData(
   "admin-sso-apps",
-  () => api<SsoApp[]>("/sso/app"),
+  () => api<SsoApp[]>("/api/sso/app"),
   { default: () => [] },
 );
 
@@ -22,7 +22,7 @@ async function createUser() {
   pending.value = true;
   error.value = "";
   try {
-    await api("/admin/users", {
+    await api("/api/admin/users", {
       method: "POST",
       body: { email: email.value, password: password.value },
     });
@@ -37,7 +37,7 @@ async function createUser() {
 }
 async function deleteUser(user: AdminUser) {
   if (!confirm(`Delete ${user.email}?`)) return;
-  await api(`/admin/users/${user.id}`, { method: "DELETE" });
+  await api(`/api/admin/users/${user.id}`, { method: "DELETE" });
   await refresh();
 }
 function isLinked(user: AdminUser, appId: string) {
@@ -46,7 +46,7 @@ function isLinked(user: AdminUser, appId: string) {
 function registerSso(user: AdminUser, app: SsoApp) {
   const form = document.createElement("form");
   form.method = "POST";
-  form.action = `${config.public.apiBase}/user/sso/register`;
+  form.action = `${config.public.apiBase}/api/user/sso/register`;
   const values = {
     userId: user.id,
     appId: app.id,
@@ -64,7 +64,7 @@ function registerSso(user: AdminUser, app: SsoApp) {
 }
 async function unregisterSso(user: AdminUser, app: SsoApp) {
   if (!confirm(`Remove ${app.name} from ${user.email}?`)) return;
-  await api("/user/sso/register", {
+  await api("/api/user/sso/register", {
     method: "DELETE",
     body: { userId: user.id, appId: app.id },
   });

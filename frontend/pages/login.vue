@@ -13,7 +13,7 @@ async function login() {
   error.value = "";
   try {
     user.value = (
-      await api<{ user: User }>("/user/login", {
+      await api<{ user: User }>("/api/user/login", {
         method: "POST",
         body: { email: email.value, password: password.value },
       })
@@ -35,7 +35,7 @@ function azureLogin() {
     appName: appName.value.trim(),
     returnUrl,
   });
-  window.location.assign(`${config.public.apiBase}/user/sso/login?${query}`);
+  window.location.assign(`${config.public.apiBase}/api/user/sso/login?${query}`);
 }
 </script>
 <template>

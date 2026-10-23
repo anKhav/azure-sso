@@ -84,7 +84,7 @@ export class SsoAppService {
             loginUrl: dto.loginUrl,
             applicationId: dto.applicationId.trim(),
             azureIssuer: dto.azureIssuer,
-            entityId: `${this.backendPublicUrl}/saml/metadata/${id}`,
+            entityId: `${this.backendPublicUrl}/api/saml/metadata/${id}`,
             certificatePath,
             certificateFingerprint: parsed.fingerprint256
               .replaceAll(":", "")
@@ -153,7 +153,7 @@ export class SsoAppService {
   }
 
   private toPublic(app: SsoAppRecord): PublicSsoApp {
-    const metadataUrl = `${this.backendPublicUrl}/saml/metadata/${app.id}`;
+    const metadataUrl = `${this.backendPublicUrl}/api/saml/metadata/${app.id}`;
     return {
       id: app.id,
       name: app.name,
@@ -162,7 +162,7 @@ export class SsoAppService {
       azureIssuer: app.azureIssuer,
       entityId: app.entityId,
       certificateFingerprint: app.certificateFingerprint,
-      acsUrl: `${this.backendPublicUrl}/saml/acs/${app.id}`,
+      acsUrl: `${this.backendPublicUrl}/api/saml/acs/${app.id}`,
       metadataUrl,
       createdAt: app.createdAt,
     };

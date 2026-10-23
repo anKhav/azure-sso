@@ -57,6 +57,7 @@ describe("Azure SAML test API", () => {
       imports: [AppModule],
     }).compile();
     app = module.createNestApplication();
+    app.setGlobalPrefix("api");
     configureApp(app);
     await app.init();
   });
@@ -68,7 +69,7 @@ describe("Azure SAML test API", () => {
 
   it("registers, validates, authenticates, authorizes, and logs out local users", async () => {
     await request(app.getHttpServer())
-      .post("/user/register")
+      .post("/api/user/register")
       .send({ email: "bad", password: "short" })
       .expect(400)
       .expect(({ body }) =>
@@ -76,7 +77,7 @@ describe("Azure SAML test API", () => {
       );
 
     const registration = await request(app.getHttpServer())
-      .post("/user/register")
+      .post("/api/user/register")
       .send({ email: "Owner@Example.com", password: "Password123!" })
       .expect(201);
     ownerCookie = registration.headers["set-cookie"][0].split(";")[0];
@@ -87,26 +88,26 @@ describe("Azure SAML test API", () => {
     expect(registration.body.user).not.toHaveProperty("passwordHash");
 
     await request(app.getHttpServer())
-      .post("/user/register")
+      .post("/api/user/register")
       .send({ email: "OWNER@example.com", password: "Password123!" })
       .expect(409)
       .expect(({ body }) => expect(body.code).toBe("EMAIL_ALREADY_REGISTERED"));
     await request(app.getHttpServer())
-      .post("/user/login")
+      .post("/api/user/login")
       .send({ email: "owner@example.com", password: "wrong-password" })
       .expect(401)
       .expect(({ body }) => expect(body.code).toBe("INVALID_CREDENTIALS"));
     await request(app.getHttpServer())
-      .get(`/user/${crypto.randomUUID()}`)
+      .get(`/api/user/${crypto.randomUUID()}`)
       .set("Cookie", ownerCookie)
       .expect(403);
     await request(app.getHttpServer())
-      .get("/user/me")
+      .get("/api/user/me")
       .set("Cookie", ownerCookie)
       .expect(200)
       .expect(({ body }) => expect(body.user.id).toBe(ownerId));
     await request(app.getHttpServer())
-      .post("/user/logout")
+      .post("/api/user/logout")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .expect(204)
@@ -116,9 +117,9 @@ describe("Azure SAML test API", () => {
   });
 
   it("requires authentication and validates X.509 certificates for SSO apps", async () => {
-    await request(app.getHttpServer()).get("/sso/app").expect(401);
+    await request(app.getHttpServer()).get("/api/sso/app").expect(401);
     await request(app.getHttpServer())
-      .post("/sso/app/create")
+      .post("/api/sso/app/create")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .field("name", "Broken")
@@ -130,7 +131,7 @@ describe("Azure SAML test API", () => {
       .expect(({ body }) => expect(body.code).toBe("INVALID_CERTIFICATE"));
 
     const created = await request(app.getHttpServer())
-      .post("/sso/app/create")
+      .post("/api/sso/app/create")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .field("name", "Softimpact")
@@ -141,12 +142,12 @@ describe("Azure SAML test API", () => {
       .expect(201);
     ssoAppId = created.body.id;
     expect(created.body).toMatchObject({
-      entityId: `https://backend.example.test/saml/metadata/${ssoAppId}`,
-      acsUrl: `https://backend.example.test/saml/acs/${ssoAppId}`,
+      entityId: `https://backend.example.test/api/saml/metadata/${ssoAppId}`,
+      acsUrl: `https://backend.example.test/api/saml/acs/${ssoAppId}`,
     });
     expect(created.body).not.toHaveProperty("certificatePath");
     await request(app.getHttpServer())
-      .post("/sso/app/create")
+      .post("/api/sso/app/create")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .field("name", "softIMPACT")
@@ -159,19 +160,19 @@ describe("Azure SAML test API", () => {
 
   it("generates matching metadata and correlated AuthnRequests and blocks open redirects", async () => {
     const metadata = await request(app.getHttpServer())
-      .get(`/saml/metadata/${ssoAppId}`)
+      .get(`/api/saml/metadata/${ssoAppId}`)
       .expect(200);
     expect(metadata.text).toContain(
-      `entityID="https://backend.example.test/saml/metadata/${ssoAppId}"`,
+      `entityID="https://backend.example.test/api/saml/metadata/${ssoAppId}"`,
     );
     expect(metadata.text).toContain(
-      `Location="https://backend.example.test/saml/acs/${ssoAppId}"`,
+      `Location="https://backend.example.test/api/saml/acs/${ssoAppId}"`,
     );
     expect(metadata.text).toContain('AuthnRequestsSigned="false"');
     expect(metadata.text).not.toContain("X509Certificate");
 
     await request(app.getHttpServer())
-      .get("/user/sso/login")
+      .get("/api/user/sso/login")
       .query({
         appName: "Softimpact",
         returnUrl: "https://evil.example/sso/result",
@@ -179,7 +180,7 @@ describe("Azure SAML test API", () => {
       .expect(400)
       .expect(({ body }) => expect(body.code).toBe("INVALID_REDIRECT_URL"));
     const start = await request(app.getHttpServer())
-      .get("/user/sso/login")
+      .get("/api/user/sso/login")
       .query({
         appName: "softIMPACT",
         returnUrl: "http://localhost:3000/sso/result",
@@ -193,10 +194,10 @@ describe("Azure SAML test API", () => {
       Buffer.from(location.searchParams.get("SAMLRequest")!, "base64"),
     ).toString("utf8");
     expect(requestXml).toContain(
-      `AssertionConsumerServiceURL="https://backend.example.test/saml/acs/${ssoAppId}"`,
+      `AssertionConsumerServiceURL="https://backend.example.test/api/saml/acs/${ssoAppId}"`,
     );
     expect(requestXml).toContain(
-      `>https://backend.example.test/saml/metadata/${ssoAppId}</saml:Issuer>`,
+      `>https://backend.example.test/api/saml/metadata/${ssoAppId}</saml:Issuer>`,
     );
     const flows = JSON.parse(
       readFileSync(
@@ -218,7 +219,7 @@ describe("Azure SAML test API", () => {
 
   it("binds registration to the authenticated local user", async () => {
     await request(app.getHttpServer())
-      .post("/user/sso/register")
+      .post("/api/user/sso/register")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .type("form")
@@ -229,7 +230,7 @@ describe("Azure SAML test API", () => {
       })
       .expect(403);
     await request(app.getHttpServer())
-      .post("/user/sso/register")
+      .post("/api/user/sso/register")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .type("form")
@@ -243,7 +244,7 @@ describe("Azure SAML test API", () => {
 
   it("accepts signed assertions for linking and login, rejects tampering, and prevents replay", async () => {
     const registrationStart = await request(app.getHttpServer())
-      .post("/user/sso/register")
+      .post("/api/user/sso/register")
       .set("Cookie", ownerCookie)
       .set("Origin", "http://localhost:3000")
       .type("form")
@@ -262,7 +263,7 @@ describe("Azure SAML test API", () => {
       "stable-azure-subject",
     );
     const linked = await request(app.getHttpServer())
-      .post(`/saml/acs/${ssoAppId}`)
+      .post(`/api/saml/acs/${ssoAppId}`)
       .type("form")
       .send({
         RelayState: registrationFlow.flowId,
@@ -274,13 +275,13 @@ describe("Azure SAML test API", () => {
     );
     expect(linked.headers["set-cookie"][0]).toContain("HttpOnly");
     await request(app.getHttpServer())
-      .get("/user/sso/links")
+      .get("/api/user/sso/links")
       .set("Cookie", ownerCookie)
       .expect(200)
       .expect(({ body }) => expect(body).toHaveLength(1));
 
     const loginStart = await request(app.getHttpServer())
-      .get("/user/sso/login")
+      .get("/api/user/sso/login")
       .query({
         appName: "Softimpact",
         returnUrl: "http://localhost:3000/sso/result",
@@ -290,7 +291,7 @@ describe("Azure SAML test API", () => {
       new URL(loginStart.headers.location).searchParams.get("RelayState")!,
     );
     const login = await request(app.getHttpServer())
-      .post(`/saml/acs/${ssoAppId}`)
+      .post(`/api/saml/acs/${ssoAppId}`)
       .type("form")
       .send({
         RelayState: loginFlow.flowId,
@@ -303,7 +304,7 @@ describe("Azure SAML test API", () => {
     );
 
     const tamperStart = await request(app.getHttpServer())
-      .get("/user/sso/login")
+      .get("/api/user/sso/login")
       .query({
         appName: "Softimpact",
         returnUrl: "http://localhost:3000/sso/result",
@@ -320,13 +321,13 @@ describe("Azure SAML test API", () => {
       signed.replace("stable-azure-subject", "tampered-subject"),
     ).toString("base64");
     const rejected = await request(app.getHttpServer())
-      .post(`/saml/acs/${ssoAppId}`)
+      .post(`/api/saml/acs/${ssoAppId}`)
       .type("form")
       .send({ RelayState: tamperFlow.flowId, SAMLResponse: tampered })
       .expect(302);
     expect(rejected.headers.location).toContain("code=SAML_VALIDATION_FAILED");
     await request(app.getHttpServer())
-      .post(`/saml/acs/${ssoAppId}`)
+      .post(`/api/saml/acs/${ssoAppId}`)
       .type("form")
       .send({ RelayState: tamperFlow.flowId, SAMLResponse: tampered })
       .expect(400)
@@ -349,8 +350,8 @@ describe("Azure SAML test API", () => {
     const now = new Date();
     const notBefore = new Date(now.getTime() - 30_000).toISOString();
     const expires = new Date(now.getTime() + 120_000).toISOString();
-    const acs = `https://backend.example.test/saml/acs/${ssoAppId}`;
-    const audience = `https://backend.example.test/saml/metadata/${ssoAppId}`;
+    const acs = `https://backend.example.test/api/saml/acs/${ssoAppId}`;
+    const audience = `https://backend.example.test/api/saml/metadata/${ssoAppId}`;
     const assertionId = `_${crypto.randomUUID().replaceAll("-", "")}`;
     const responseId = `_${crypto.randomUUID().replaceAll("-", "")}`;
     const xml = `<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${responseId}" Version="2.0" IssueInstant="${now.toISOString()}" Destination="${acs}" InResponseTo="${flow.requestId}"><saml:Issuer>https://issuer.example.test/</saml:Issuer><samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></samlp:Status><saml:Assertion ID="${assertionId}" Version="2.0" IssueInstant="${now.toISOString()}"><saml:Issuer>https://issuer.example.test/</saml:Issuer><saml:Subject><saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">${nameId}</saml:NameID><saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml:SubjectConfirmationData InResponseTo="${flow.requestId}" Recipient="${acs}" NotOnOrAfter="${expires}"/></saml:SubjectConfirmation></saml:Subject><saml:Conditions NotBefore="${notBefore}" NotOnOrAfter="${expires}"><saml:AudienceRestriction><saml:Audience>${audience}</saml:Audience></saml:AudienceRestriction></saml:Conditions><saml:AuthnStatement AuthnInstant="${now.toISOString()}" SessionIndex="test-session"><saml:AuthnContext><saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef></saml:AuthnContext></saml:AuthnStatement></saml:Assertion></samlp:Response>`;

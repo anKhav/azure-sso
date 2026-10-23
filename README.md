@@ -47,18 +47,18 @@ Errors use `{ error, code, message, traceId }`; assertions, NameIDs, passwords, 
 
 | Method and path | Purpose | Authentication |
 |---|---|---|
-| `POST /user/register` | Create local account and session | Public |
-| `POST /user/login` | Password login | Public |
-| `GET /user/me` | Restore session | Cookie |
-| `GET /user/:id` | Read only current user | Cookie |
-| `POST /user/logout` | Clear session | Cookie + trusted Origin |
-| `POST /sso/app/create` | Upload app config and X.509 cert | Cookie + trusted Origin |
-| `GET /sso/app`, `GET /sso/app/:id` | Public-safe app config | Cookie |
-| `POST /user/sso/register` | Start linking AuthnRequest from form body | Cookie + trusted Origin |
-| `GET /user/sso/login` | Start linked login | Public |
-| `GET /user/sso/links` | List current user’s links without NameIDs | Cookie |
-| `POST /saml/acs/:appId` | Entra HTTP-POST callback | SAML protected |
-| `GET /saml/metadata/:appId` | Per-app SP metadata | Public |
+| `POST /api/user/register` | Create local account and session | Public |
+| `POST /api/user/login` | Password login | Public |
+| `GET /api/user/me` | Restore session | Cookie |
+| `GET /api/user/:id` | Read only current user | Cookie |
+| `POST /api/user/logout` | Clear session | Cookie + trusted Origin |
+| `POST /api/sso/app/create` | Upload app config and X.509 cert | Cookie + trusted Origin |
+| `GET /api/sso/app`, `GET /api/sso/app/:id` | Public-safe app config | Cookie |
+| `POST /api/user/sso/register` | Start linking AuthnRequest from form body | Cookie + trusted Origin |
+| `GET /api/user/sso/login` | Start linked login | Public |
+| `GET /api/user/sso/links` | List current user’s links without NameIDs | Cookie |
+| `POST /api/saml/acs/:appId` | Entra HTTP-POST callback | SAML protected |
+| `GET /api/saml/metadata/:appId` | Per-app SP metadata | Public |
 
 SAML starts use full browser navigation. The frontend supplies a `returnUrl`, which may use any path on the configured `FRONTEND_URL` origin. Outcomes contain only `status` and a safe code.
 

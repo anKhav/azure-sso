@@ -19,7 +19,7 @@ Admin mutations require a valid session cookie, the `admin` role, and a trusted 
 ## 1. Register an SSO application
 
 ```http
-POST /sso/app/create
+POST /api/sso/app/create
 Content-Type: multipart/form-data
 Cookie: azure_saml_session=...
 Origin: https://your-host
@@ -45,16 +45,16 @@ Response:
 {
   "id": "uuid",
   "name": "Test",
-  "entityId": "https://your-host/saml/metadata/{id}",
-  "acsUrl": "https://your-host/saml/acs/{id}",
-  "metadataUrl": "https://your-host/saml/metadata/{id}"
+  "entityId": "https://your-host/api/saml/metadata/{id}",
+  "acsUrl": "https://your-host/api/saml/acs/{id}",
+  "metadataUrl": "https://your-host/api/saml/metadata/{id}"
 }
 ```
 
 Delete an application:
 
 ```http
-DELETE /sso/app/{appId}
+DELETE /api/sso/app/{appId}
 ```
 
 ```http
@@ -70,7 +70,7 @@ The application certificate and associated SSO links are deleted.
 ## 2. Register a user for SSO
 
 ```http
-POST /user/sso/register
+POST /api/user/sso/register
 Content-Type: application/x-www-form-urlencoded
 Cookie: azure_saml_session=...
 Origin: https://your-host
@@ -81,7 +81,7 @@ Payload:
 | Field | Description |
 |---|---|
 | `userId` | ID of the local user that the admin wants to link to an Azure identity. |
-| `appId` | ID of the SSO application created by `POST /sso/app/create`. |
+| `appId` | ID of the SSO application created by `POST /api/sso/app/create`. |
 | `returnUrl` | Same-origin frontend URL opened after completion. The frontend chooses its path and query parameters. |
 
 ```json
@@ -107,7 +107,7 @@ Location: https://login.microsoftonline.com/.../saml2?SAMLRequest=...&RelayState
 Azure callback:
 
 ```http
-POST /saml/acs/{appId}
+POST /api/saml/acs/{appId}
 Content-Type: application/x-www-form-urlencoded
 ```
 
@@ -132,7 +132,7 @@ Location: https://your-host/sso/result?status=success
 ### Unregister a user from SSO
 
 ```http
-DELETE /user/sso/register
+DELETE /api/user/sso/register
 Content-Type: application/json
 Cookie: azure_saml_session=...
 Origin: https://your-host
@@ -159,7 +159,7 @@ Origin: https://your-host
 ## 3. SSO login
 
 ```http
-GET /user/sso/login?appName=Test&returnUrl=https%3A%2F%2Fyour-host%2Fdashboard
+GET /api/user/sso/login?appName=Test&returnUrl=https%3A%2F%2Fyour-host%2Fdashboard
 ```
 
 - `appName`: exact local `name` used when the SSO application was created.
@@ -175,7 +175,7 @@ Location: https://login.microsoftonline.com/.../saml2?SAMLRequest=...&RelayState
 Azure posts the result to:
 
 ```http
-POST /saml/acs/{appId}
+POST /api/saml/acs/{appId}
 ```
 
 The backend validates the signature, certificate, issuer, audience, destination, recipient, `InResponseTo`, expiration, and one-time `RelayState`. It resolves the local user from `appId + NameID`.

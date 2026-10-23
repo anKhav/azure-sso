@@ -4,14 +4,14 @@ definePageMeta({ middleware: "admin" });
 const api = useApi();
 const { data: apps, error } = await useAsyncData(
   "sso-apps",
-  () => api<SsoApp[]>("/sso/app"),
+  () => api<SsoApp[]>("/api/sso/app"),
   { default: () => [] },
 );
 const deleting = ref("");
 async function deleteApp(app: SsoApp) {
   if (!confirm(`Delete ${app.name} and all its SSO links?`)) return;
   deleting.value = app.id;
-  try { await api(`/sso/app/${app.id}`, { method: "DELETE" }); apps.value = apps.value.filter((item) => item.id !== app.id); }
+  try { await api(`/api/sso/app/${app.id}`, { method: "DELETE" }); apps.value = apps.value.filter((item) => item.id !== app.id); }
   finally { deleting.value = ""; }
 }
 </script>

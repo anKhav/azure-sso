@@ -25,7 +25,7 @@ async function submit() {
   Object.entries(fields).forEach(([key, value]) => body.append(key, value));
   body.append("certificate", certificate.value);
   try {
-    const app = await api<SsoApp>("/sso/app/create", { method: "POST", body });
+    const app = await api<SsoApp>("/api/sso/app/create", { method: "POST", body });
     await navigateTo(`/sso/${app.id}`);
   } catch (cause) {
     error.value = apiErrorMessage(cause);

@@ -1,10 +1,11 @@
 import { NestFactory } from "@nestjs/core";
+import { ExpressAdapter } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
 import { configureApp } from "./configure-app";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, new ExpressAdapter());
   configureApp(app);
   const swaggerConfig = new DocumentBuilder()
     .setTitle("Azure SAML SSO API")

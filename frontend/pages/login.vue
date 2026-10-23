@@ -30,10 +30,10 @@ function azureLogin() {
     error.value = "Enter the configured SSO application name";
     return;
   }
-  const redirectUrl = new URL("/sso/result", window.location.origin).toString();
+  const returnUrl = new URL("/dashboard", window.location.origin).toString();
   const query = new URLSearchParams({
     appName: appName.value.trim(),
-    redirectUrl,
+    returnUrl,
   });
   window.location.assign(`${config.public.apiBase}/user/sso/login?${query}`);
 }

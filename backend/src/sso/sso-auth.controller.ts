@@ -73,7 +73,7 @@ export class SsoAuthController {
       operation: "register",
       initiatingUserId: request.userId,
       targetUserId: body.userId,
-      redirectUrl: this.redirects.approve(body.redirectUrl),
+      redirectUrl: this.redirects.approve(body.returnUrl),
     });
     response.redirect(
       HttpStatus.SEE_OTHER,
@@ -90,7 +90,7 @@ export class SsoAuthController {
     const flow = await this.flows.create({
       appId: app.id,
       operation: "login",
-      redirectUrl: this.redirects.approve(query.redirectUrl),
+      redirectUrl: this.redirects.approve(query.returnUrl),
     });
     response.redirect(
       HttpStatus.FOUND,

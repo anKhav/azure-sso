@@ -174,7 +174,7 @@ describe("Azure SAML test API", () => {
       .get("/user/sso/login")
       .query({
         appName: "Softimpact",
-        redirectUrl: "https://evil.example/sso/result",
+        returnUrl: "https://evil.example/sso/result",
       })
       .expect(400)
       .expect(({ body }) => expect(body.code).toBe("INVALID_REDIRECT_URL"));
@@ -182,7 +182,7 @@ describe("Azure SAML test API", () => {
       .get("/user/sso/login")
       .query({
         appName: "softIMPACT",
-        redirectUrl: "http://localhost:3000/sso/result",
+        returnUrl: "http://localhost:3000/sso/result",
       })
       .expect(302);
     const location = new URL(start.headers.location);
@@ -211,7 +211,7 @@ describe("Azure SAML test API", () => {
     expect(flow).toMatchObject({
       appId: ssoAppId,
       operation: "login",
-      redirectUrl: "http://localhost:3000/sso/result",
+      returnUrl: "http://localhost:3000/sso/result",
     });
     expect(requestXml).toContain(`ID="${flow?.requestId}"`);
   });
@@ -225,7 +225,7 @@ describe("Azure SAML test API", () => {
       .send({
         userId: crypto.randomUUID(),
         appId: ssoAppId,
-        redirectUrl: "http://localhost:3000/sso/result",
+        returnUrl: "http://localhost:3000/sso/result",
       })
       .expect(403);
     await request(app.getHttpServer())
@@ -236,7 +236,7 @@ describe("Azure SAML test API", () => {
       .send({
         userId: ownerId,
         appId: ssoAppId,
-        redirectUrl: "http://localhost:3000/sso/result",
+        returnUrl: "http://localhost:3000/sso/result",
       })
       .expect(302);
   });
@@ -250,7 +250,7 @@ describe("Azure SAML test API", () => {
       .send({
         userId: ownerId,
         appId: ssoAppId,
-        redirectUrl: "http://localhost:3000/sso/result",
+        returnUrl: "http://localhost:3000/sso/result",
       })
       .expect(302);
     const registrationLocation = new URL(registrationStart.headers.location);
@@ -283,7 +283,7 @@ describe("Azure SAML test API", () => {
       .get("/user/sso/login")
       .query({
         appName: "Softimpact",
-        redirectUrl: "http://localhost:3000/sso/result",
+        returnUrl: "http://localhost:3000/sso/result",
       })
       .expect(302);
     const loginFlow = latestFlow(
@@ -306,7 +306,7 @@ describe("Azure SAML test API", () => {
       .get("/user/sso/login")
       .query({
         appName: "Softimpact",
-        redirectUrl: "http://localhost:3000/sso/result",
+        returnUrl: "http://localhost:3000/sso/result",
       })
       .expect(302);
     const tamperFlow = latestFlow(

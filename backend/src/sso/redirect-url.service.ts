@@ -5,16 +5,10 @@ import { ApiError } from "../common/api-error";
 @Injectable()
 export class RedirectUrlService {
   private readonly frontendOrigin: string;
-  private readonly allowedPaths: Set<string>;
   constructor(config: ConfigService) {
     this.frontendOrigin = new URL(
       config.get<string>("FRONTEND_URL") ?? "http://localhost:3000",
     ).origin;
-    this.allowedPaths = new Set(
-      (config.get<string>("SAML_REDIRECT_PATHS") ?? "/sso/result")
-        .split(",")
-        .map((path) => path.trim()),
-    );
   }
 
   approve(value: string): string {
@@ -28,12 +22,7 @@ export class RedirectUrlService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    if (
-      url.origin !== this.frontendOrigin ||
-      !this.allowedPaths.has(url.pathname) ||
-      url.username ||
-      url.password
-    ) {
+    if (url.origin !== this.frontendOrigin || url.username || url.password) {
       throw new ApiError(
         "INVALID_REDIRECT_URL",
         "Redirect URL is not allowed",

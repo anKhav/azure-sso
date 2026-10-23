@@ -7,8 +7,11 @@ export class StartSsoRegisterDto {
   @ApiProperty({ format: "uuid", description: "Configured SSO application." })
   @IsUUID()
   appId!: string;
-  @ApiProperty({ example: "https://your-host/sso/result" })
+  @ApiProperty({
+    example: "https://your-host/admin/users",
+    description: "Same-origin frontend URL opened after completion.",
+  })
   @IsUrl({ require_protocol: true, require_tld: false })
   @MaxLength(2048)
-  redirectUrl!: string;
+  returnUrl!: string;
 }

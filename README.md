@@ -20,7 +20,7 @@ npm run dev:frontend
 
 The frontend is `http://localhost:3000` and backend is `http://localhost:3001`. JSON data uses serialized atomic replacement under `backend/database`; normalized IdP certificates use mode `0600` under `backend/uploads/certificates`. Both are ignored by git.
 
-Before non-local use, replace `SESSION_SECRET` with 32+ random characters, set `COOKIE_SECURE=true`, and set exact public HTTPS values for `BACKEND_PUBLIC_URL` and `FRONTEND_URL`. `SAML_REDIRECT_PATHS` is a comma-separated exact path allowlist, defaulting to `/sso/result`.
+Before non-local use, replace `SESSION_SECRET` with 32+ random characters, set `COOKIE_SECURE=true`, and set exact public HTTPS values for `BACKEND_PUBLIC_URL` and `FRONTEND_URL`.
 
 ## Microsoft Entra configuration
 
@@ -60,7 +60,7 @@ Errors use `{ error, code, message, traceId }`; assertions, NameIDs, passwords, 
 | `POST /saml/acs/:appId` | Entra HTTP-POST callback | SAML protected |
 | `GET /saml/metadata/:appId` | Per-app SP metadata | Public |
 
-SAML starts use full browser navigation. `redirectUrl` must match `FRONTEND_URL` and an exact allowed path. Outcomes contain only `status` and a safe code; the result page calls `/user/me` before showing success.
+SAML starts use full browser navigation. The frontend supplies a `returnUrl`, which may use any path on the configured `FRONTEND_URL` origin. Outcomes contain only `status` and a safe code.
 
 ## Security model
 

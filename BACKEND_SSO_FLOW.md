@@ -82,13 +82,13 @@ Payload:
 |---|---|
 | `userId` | ID of the local user that the admin wants to link to an Azure identity. |
 | `appId` | ID of the SSO application created by `POST /sso/app/create`. |
-| `redirectUrl` | Approved frontend URL to receive the final success or error status. |
+| `returnUrl` | Same-origin frontend URL opened after completion. The frontend chooses its path and query parameters. |
 
 ```json
 {
   "userId": "local-user-uuid",
   "appId": "sso-app-uuid",
-  "redirectUrl": "https://your-host/sso/result"
+  "returnUrl": "https://your-host/admin/users"
 }
 ```
 
@@ -159,11 +159,11 @@ Origin: https://your-host
 ## 3. SSO login
 
 ```http
-GET /user/sso/login?appName=Test&redirectUrl=https%3A%2F%2Fyour-host%2Fsso%2Fresult
+GET /user/sso/login?appName=Test&returnUrl=https%3A%2F%2Fyour-host%2Fdashboard
 ```
 
 - `appName`: exact local `name` used when the SSO application was created.
-- `redirectUrl`: approved frontend URL to receive the login result.
+- `returnUrl`: same-origin frontend URL opened after the login result.
 
 No existing session is required. The backend creates a temporary SAML flow and returns:
 
